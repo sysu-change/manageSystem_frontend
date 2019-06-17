@@ -88,11 +88,11 @@
       }
     },
     methods:{
-      Success(){
+      Success(row){
 
       },
 
-      Fail(){
+      Fail(row){
         
       }
     }
