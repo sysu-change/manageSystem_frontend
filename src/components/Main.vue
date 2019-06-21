@@ -22,11 +22,8 @@
           <el-form-item label="被投诉人学号">
             <span>{{ props.row.number_to }}</span>
           </el-form-item>
-          <el-form-item label="投诉原因">
-            <span>{{ props.row.desc }}</span>
-          </el-form-item>
-          <el-form-item label="截图">
-            <span>{{ props.row.desc }}</span>
+         <el-form-item label="截图">
+            <span>详见'细节查看'</span>
           </el-form-item>
         </el-form>
       </template>
@@ -46,6 +43,9 @@
           size="mini"
           type="danger"
           @click="Fail(scope.row)">投诉失败</el-button>
+          <el-button
+          size="mini"
+          @click="Detail(scope.row)">查看细节</el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -59,42 +59,119 @@
   export default {
     data() {
       return {
-        tableData: [{
-          id: '5',
-          number_from:'16341018',
-          number_to:'16341025',
-          task_id:'7',
-          desc: '未按时完成',
-          
-        }, {
-          id: '4',
-          number_from:'16341011',
-          number_to:'16341025',
-          task_id:'8',
-          desc: '未按时完成',
-        }, {
-         id: '2',
-          number_from:'16341019',
-          number_to:'16341025',
-          task_id:'7',
-          desc: '未按时完成',
-        }, {
-          id: '5',
-          number_from:'16341018',
-          number_to:'16341025',
-          task_id:'7',
-          desc: '未按时完成',
-        }]
+        ico: 'R0lGODlhWAAfAJEAAAAAAP////8AAGZmZiH5BAAHAP8ALAAAAABYAB8AAALfhI+py+0PX5i02ouz3rxn44XiSHJgiaYqdq7uK7bwTFtyjcN3zqd7D4wBgkTSr4i87AQCCrPCfFoG1IGIWqtabUOLNPCVfgNY8rZTzp4py+Yk7B6nL9pp3T6f3O3KLrQJ6OYlqLdGUTaHuKZYwcjHdfEUOEh4aGiW4Vi4acnZeNkGBlb5Ror5mbmVqLrISgfq9zcqO4uxmup5enuKChk56RRHqKnbmktMnDvxI1kZRbpnmZccXTittXaUtB2gzY3k/U0ULg5EXs5zjo6jvk7T7q4TGz8+T28eka+/zx9RAAA7'
+        ,
+        tableData: []
       }
     },
     methods:{
-      Success(row){
 
+       //查看所有被投诉的任务，待审核
+    getComplain: function(vm) {
+      if (this.user_id === "") return;
+      vm.loading=true;
+      var URL = "http://localhost:8082/module/user/get_complaint/all";
+      var jsonData = { offset: 0, number: 100 };
+      var axios = {
+        method: "get",
+        url: URL,
+        widthCredentials: false,
+        params: jsonData
+      };
+      this.$http(axios)
+        .then(function(res) {
+          if (res.status == 200) {
+            if (res.data.code == 200) {
+              var number = res.data.number;
+              var content = res.data.content;
+              var jsonContent = content;
+              for (var i = 0; i < number; i++) {
+                var temp = jsonContent[i];
+                var tempIndex = {
+                  id: 0,
+                  task_id: 0,
+                  number_from:"",
+                  number_to:""
+                };
+                tempIndex.id = temp.cid;
+                tempIndex.task_id = temp.tid;
+                tempIndex.number_from = temp.sid1;
+                tempIndex.number_to = temp.sid2;
+                
+                vm.tableData.push(tempIndex);
+              }
+              vm.loading=false;
+            } else {
+              alert(res.data.msg);
+            }
+          } else alert("网络出错");
+        })
+        .catch(function(err) {
+          console.log(err);
+        });
+    },
+
+      Success(row){
+           var jsonData = {
+        cid: parseInt(row.id),
+        verify:1
+      };
+var axios = {
+        method: "put",
+        url: "http://localhost:8082/module/user/complaint_handle",
+        widthCredentials: false,
+        data: jsonData
+      };
+     
+    this.$http(axios).then(function(res){
+          if(res.status==200) {
+           alert("已提交！");
+          }
+          else alert("网络错误");
+        }).catch(function(err){
+          console.log(err);
+          alert("发生了一个异常");
+        });
       },
 
       Fail(row){
-        
-      }
+         var jsonData = {
+        cid: parseInt(row.id),
+        verify:2
+      };
+var axios = {
+        method: "put",
+        url: "http://localhost:8082/module/user/complaint_handle",
+        widthCredentials: false,
+        data: jsonData
+      };
+     
+    this.$http(axios).then(function(res){
+          if(res.status==200) {
+           alert("已提交！");
+          }
+          else alert("网络错误");
+        }).catch(function(err){
+          console.log(err);
+          alert("发生了一个异常");
+        });
+      },
+
+      Detail(row){
+        this.$router.push({
+          name: 'Detail',
+          params: {
+            id: row.id
+          }
+        })
+      },
+
+      
+
+    },
+    created(){
+      this.getComplain(this);
+
     }
   }
 </script>
