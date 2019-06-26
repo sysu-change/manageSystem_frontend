@@ -33,9 +33,8 @@
       <el-card>
           <h3 align="left">截图:</h3>
           <div v-for="pict in photo_list"  >
-           
-           <img  :src="'data:image/png;base64,'+pict.photo0">
-             
+           <img class="image" :src="'data:image/png;base64,'+pict.photo0">
+             <img  :src="'data:image/png;base64,'+pict.photo1">
 
           </div>
       </el-card>
@@ -66,7 +65,7 @@ export default {
         //查看所有被投诉的任务，待审核
     getInfo: function(vm) {
      
-      vm.loading=true;
+      
       var URL = "http://localhost:8082/module/user/get_complaint/"+parseInt(vm.cid);
       
       var axios = {
@@ -84,8 +83,12 @@ export default {
                 vm.sid1= res.data.sid1;
                 vm.sid2 = res.data.sid2;
                 vm.reason=res.data.reason;
-                var number=res.data.number;
-               vm.photo_list=res.data.photo;
+                let number=res.data.number;
+               
+
+               
+                   vm.photo_list=res.data.photo;
+               
                  console.log(number);
                 
                
@@ -124,5 +127,10 @@ export default {
   background-color: #ffffff;
   left: 20%;
   width: 60%;
+}
+
+.image{
+  width:150px;
+  height: 150px;
 }
 </style>
