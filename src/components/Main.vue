@@ -223,7 +223,7 @@ var axios = {
 <style>
 .title{
   position: relative;
-  left:10%
+  left:0%
 }
  .box{
    position: relative;
